@@ -1,7 +1,7 @@
-#include "FileManager.h"
+#include "TreeManager.h"
 #include <fstream>
 
-void FileManager::readAndWrite(string txtFile, string binFile){
+void TreeManager::readAndWrite(string txtFile, string binFile){
     ifstream inFile;
     ofstream outFile;
     int n;
@@ -25,7 +25,7 @@ void FileManager::readAndWrite(string txtFile, string binFile){
     outFile.close();
 }
 
-void FileManager::readBin(string binFile){
+void TreeManager::readBin(string binFile){
 
     Node node;
     ifstream inFile;
@@ -34,5 +34,23 @@ void FileManager::readBin(string binFile){
     while(inFile.read((char*) (&node), sizeof(Node))){ 
         cout << node.n << " " << node.A[0] << " ";
     }
+}
+
+TreeManager::Result TreeManager::mSearch(Node* T, int x){
+    TreeManager::Node* p = T;
+    TreeManager::Node* q = NULL;
+
+    while(p != NULL){
+        int i = 0;
+        for(int num : p->K){
+            if(num == x){
+                return {p, i, true};
+            }
+            i++;
+        }
+        q = p;
+        p = p->A[i];
+    }
+    return {NULL, -1, false}; //nao encontrou
 }
 

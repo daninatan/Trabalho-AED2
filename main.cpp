@@ -15,13 +15,13 @@ no índice também deve ser impressa; caso contrário, mostrar a localização d
 pode ser inserida, conforme o seguinte exemplo de execução:
 */
 
-#include "FileManager.h"
+#include "TreeManager.h"
 
 using namespace std;
 
 int main(){
-    FileManager fileManager;
-    fileManager.readAndWrite("mvias.txt", "mvias.bin");
+    TreeManager treeManager;
+    treeManager.readAndWrite("mvias.txt", "mvias.bin");
     cout << "\n";
-    fileManager.readBin("mvias.bin");
+    treeManager.readBin("mvias.bin");
 }
