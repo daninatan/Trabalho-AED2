@@ -28,8 +28,7 @@ class TreeManager{
     public:
         
         void readAndWrite(string txtFile, string binFile);
-        void readBin(string binFile);
-        Result mSearch(Node* T, int x);
+        Result mSearch(string binFile, int x);
 };
 
 #endif

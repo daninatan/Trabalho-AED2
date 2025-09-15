@@ -22,6 +22,5 @@ using namespace std;
 int main(){
     TreeManager treeManager;
     treeManager.readAndWrite("mvias.txt", "mvias.bin");
-    cout << "\n";
-    treeManager.readBin("mvias.bin");
+    treeManager.mSearch("mvias.bin", 10);
 }

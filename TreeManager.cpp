@@ -18,39 +18,49 @@ void TreeManager::readAndWrite(string txtFile, string binFile){
             inFile >> treeNode.K[i - 1];
             inFile >> treeNode.A[i];
         }  
-        cout << treeNode.n << " " << treeNode.A[0] << " ";
         outFile.write((const char *)(&treeNode), sizeof(Node)); 
     }
     inFile.close();
     outFile.close();
 }
 
-void TreeManager::readBin(string binFile){
+TreeManager::Result TreeManager::mSearch(string binFile, int x){
 
-    Node node;
-    ifstream inFile;
-    inFile.open(binFile, ios::binary);
+    Result result;
+    ifstream file;
+    file.open(binFile, ios::in);
+    Node p, q;
+    file.read((char*)(&p), sizeof(Node));
+    cout << p.A[0] << endl;
+    cout << p.K[0] << endl;
 
-    while(inFile.read((char*) (&node), sizeof(Node))){ 
-        cout << node.n << " " << node.A[0] << " ";
-    }
-}
+    while(p.A[0] != 0 || p.A[1] != 0 || p.A[2] != 0){
+        int index;
 
-TreeManager::Result TreeManager::mSearch(Node* T, int x){
-    TreeManager::Node* p = T;
-    TreeManager::Node* q = NULL;
-
-    while(p != NULL){
-        int i = 0;
-        for(int num : p->K){
-            if(num == x){
-                return {p, i, true};
-            }
-            i++;
+        if(x < p.K[0]){
+            index = 0;
+        }else if(x >= p.K[0] || x < p.K[1]){
+            index = 1;
+        }else{
+            index = 2;
         }
-        q = p;
-        p = p->A[i];
+
+        if(x == p.K[index]){
+            break;
+        }else{
+            if(p.A[index] == 0){
+                cout << index << endl;
+                cout << p.A[index] << endl;
+                cout << p.K[0] << endl;
+                break;
+            }else{
+                file.seekg(p.A[index] * sizeof(Node), ios::beg);
+                file.read((char*)(&p), sizeof(Node));
+            }
+           
+        }
     }
-    return {NULL, -1, false}; //nao encontrou
+    cout << "Nao achou";
+    return result;
 }
 
