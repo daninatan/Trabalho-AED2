@@ -6,7 +6,7 @@ Daniel Natan dos Santos Brito - 15446902*/
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <climits> //para pegar o máximo e o mínimo int
+#include <climits> //biblioteca para os valores maximos e minimos do int
 
 using namespace std;
 
@@ -29,8 +29,7 @@ class TreeManager{
 
         void readAndWrite(string txtFile, string binFile);
         void mSearch(string binFile, int x);
-
-        
+        void printTree(string binFile);     
 };
 
 #endif

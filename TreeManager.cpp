@@ -34,7 +34,8 @@ void TreeManager::readAndWrite(string txtFile, string binFile){
 void TreeManager::mSearch(string binFile, int x){
     ifstream file;
     file.open(binFile, ios::in);
-    Node p, q;
+    Node p; //utilizada para fazer as leitutas
+    int q = 1; //utilizada para guardar em qual indice do arquivo o registro esta
     file.read((char*)(&p), sizeof(Node));
 
     while(true){
@@ -45,25 +46,46 @@ void TreeManager::mSearch(string binFile, int x){
                 index = i;
             }
         }
-        //cout << index << endl;
-        //cout << p.K[index] << endl;
 
         if(x == p.K[index]){
-            cout << "Achou" << endl;
-            cout << "(" << ", " << index << ", true)" << endl;
+            cout <<  "(" << q << ", " << index << ", true)" << endl; //retornado caso a chave tenha sido encontrada
             return;
             break;
         }else{     
             if(p.A[index] == 0){
+                cout << "(" << q << ", " << index << ", false)" << endl; //retornado caso a chave nao tenha sido encontrada
                 break;
             }else{
+                q = p.A[index];
                 file.seekg((p.A[index] - 1) * sizeof(Node), ios::beg);
                 file.read((char*)(&p), sizeof(Node));
             }
            
         }
     }
-    cout << "Nao achou" << endl;
     return;
+}
+
+//funcao para printar o arquivo completo na tela
+void TreeManager::printTree(string binFile){
+    ifstream file;
+    file.open(binFile, ios::in);
+    Node p;
+    int index = 1;
+
+    cout << "===========================================" << endl;
+    cout << "No n, A[0], (K[1],A[1]), ... , (K[n],A[n])" << endl;
+    while(file.read((char*)(&p), sizeof(Node))){
+        
+        cout << index << "  ";
+        cout << p.n << "  ";
+        cout << p.A[0] << ",    ";
+        for(int i = 1; i <= p.n; i++){
+            cout << "(" << p.K[i] << ",  " << p.A[i] << ")  ";
+        }
+        cout << endl;
+        index++;
+    }
+    cout << "===========================================\n\n";
 }
 

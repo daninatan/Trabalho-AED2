@@ -6,7 +6,7 @@ Daniel Natan dos Santos Brito - 15446902*/
 
 using namespace std;
 
-void mSearch(){
+void mSearchMenu(){
     TreeManager T;
     int key;
     char confirmation;
@@ -18,8 +18,9 @@ void mSearch(){
             break;
         }
         
-        T.mSearch("mvias2.bin", key);
-        //T.mSearch("mvias.bin", key);
+        T.mSearch("mvias.bin", key);
+        //T.mSearch("mvias2.bin", key);
+        //T.mSearch("mvias2_2.bin", key);
 
         cout << "Continuar busca (s/n)? ";
         cin >> confirmation;
@@ -38,5 +39,7 @@ int main(){
     TreeManager treeManager;
     treeManager.readAndWrite("mvias.txt", "mvias.bin");
     treeManager.readAndWrite("mvias2.txt", "mvias2.bin");
-    mSearch();
+    treeManager.readAndWrite("mvias2_2.txt", "mvias2_2.bin");
+    treeManager.printTree("mvias.bin");
+    mSearchMenu();
 }
