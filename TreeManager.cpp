@@ -11,11 +11,13 @@ void TreeManager::readAndWrite(string txtFile, string binFile){
 
     while(inFile >> n){
         Node treeNode{};
+        treeNode.K[0] = MIN;
         treeNode.n = n;
+        treeNode.K[n+1] = MAX;
         inFile >> treeNode.A[0]; //Le a primeira subarvore
 
         for(int i = 1; i <= treeNode.n; i++){ //Le as respectivas chaves e as respectivas subarvores, de acordo com o valor N
-            inFile >> treeNode.K[i - 1];
+            inFile >> treeNode.K[i];
             inFile >> treeNode.A[i];
         }  
         outFile.write((const char *)(&treeNode), sizeof(Node)); 
@@ -31,30 +33,27 @@ TreeManager::Result TreeManager::mSearch(string binFile, int x){
     file.open(binFile, ios::in);
     Node p, q;
     file.read((char*)(&p), sizeof(Node));
-    cout << p.A[0] << endl;
-    cout << p.K[0] << endl;
 
-    while(p.A[0] != 0 || p.A[1] != 0 || p.A[2] != 0){
+    while(true){
         int index;
 
-        if(x < p.K[0]){
-            index = 0;
-        }else if(x >= p.K[0] || x < p.K[1]){
-            index = 1;
-        }else{
-            index = 2;
+        for(int i = 0; i <= p.n; i++){
+            if(p.K[i] <= x && x < p.K[i+1]){
+                index = i;
+            }
         }
+        cout << index << endl;
+        cout << p.K[index] << endl;
 
         if(x == p.K[index]){
+            cout << "Achou";
+            return result;
             break;
-        }else{
+        }else{     
             if(p.A[index] == 0){
-                cout << index << endl;
-                cout << p.A[index] << endl;
-                cout << p.K[0] << endl;
                 break;
             }else{
-                file.seekg(p.A[index] * sizeof(Node), ios::beg);
+                file.seekg((p.A[index] - 1) * sizeof(Node), ios::beg);
                 file.read((char*)(&p), sizeof(Node));
             }
            

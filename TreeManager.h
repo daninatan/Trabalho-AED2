@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <climits> //para pegar o máximo e o mínimo int
 
 using namespace std;
 
@@ -8,14 +9,14 @@ using namespace std;
 #define TREEMANAGER_H
 
 #define M 3 //quantidade de vias
-#define MAX 2147483648; //maior e menor int representável
-#define MIN -2147483648;
+#define MAX INT_MAX //maior e menor int representável
+#define MIN INT_MIN;
 
 class TreeManager{
 
     struct Node {
         int n;
-        int K[M - 1];
+        int K[M - 1 + 2];
         int A[M];
     };
 

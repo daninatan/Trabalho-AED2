@@ -22,5 +22,5 @@ using namespace std;
 int main(){
     TreeManager treeManager;
     treeManager.readAndWrite("mvias.txt", "mvias.bin");
-    treeManager.mSearch("mvias.bin", 10);
+    treeManager.mSearch("mvias.bin", 35);
 }
