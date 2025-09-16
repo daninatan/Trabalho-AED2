@@ -1,26 +1,42 @@
-/*Realizar pesquisas em árvore de busca m-vias, com m = 3
-
-a) Um procedimento que lê a árvore, a partir do arquivo-texto mvias.txt, no formato: n, A0,
-(K1,A1), ..., (Kn,An) e grava cada registro no arquivo binário em disco mvias.bin. Isso significa
-que o usuário deverá fornecer os valores de n, A0, (K1,A1), ..., (Kn,An) corretamente no arquivo
-mvias.txt e que a árvore (arquivo binário) já deverá residir em disco para as partes seguintes do
-trabalho. Omita, no arquivo mvias.txt, os separadores tais como vírgulas ou parênteses no
-formato do nó se isso for mais conveniente para a leitura dos dados;
-
-b) Um método que implementa o algoritmo mSearch;
-
-c) O programa principal que deverá ler valores de chave fornecidos pelo usuário (pelo teclado) e,
-usando mSearch, indicar se encontrou ou não a chave no índice. Se encontrar, a localização da chave
-no índice também deve ser impressa; caso contrário, mostrar a localização de onde na árvore a chave
-pode ser inserida, conforme o seguinte exemplo de execução:
-*/
+/*Participantes:
+Guilherme Borges de Pádua Barbosa - 15653045
+Daniel Natan dos Santos Brito - 15446902*/
 
 #include "TreeManager.h"
 
 using namespace std;
 
+void mSearch(){
+    TreeManager T;
+    int key;
+    char confirmation;
+
+    do{
+        cout << "Chave de busca: ";
+        if(!(cin >> key)){
+            cout << "Tipo inválido de chave" << endl;
+            break;
+        }
+        
+        T.mSearch("mvias2.bin", key);
+        //T.mSearch("mvias.bin", key);
+
+        cout << "Continuar busca (s/n)? ";
+        cin >> confirmation;
+
+        if (confirmation == 'n')
+            break;
+        else if(confirmation != 's'){
+            cout << "Entrada inválida" << endl;
+            break;
+        }
+
+    }while(true);
+}
+
 int main(){
     TreeManager treeManager;
     treeManager.readAndWrite("mvias.txt", "mvias.bin");
-    treeManager.mSearch("mvias.bin", 35);
+    treeManager.readAndWrite("mvias2.txt", "mvias2.bin");
+    mSearch();
 }

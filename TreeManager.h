@@ -1,3 +1,8 @@
+/*Participantes:
+Guilherme Borges de Pádua Barbosa - 15653045
+Daniel Natan dos Santos Brito - 15446902*/
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -18,18 +23,14 @@ class TreeManager{
         int n;
         int K[M - 1 + 2];
         int A[M];
-    };
-
-    struct Result { //struct para retornar o resultado 
-        Node* node;
-        int i;
-        bool b;
-    };
+    };  
 
     public:
-        
+
         void readAndWrite(string txtFile, string binFile);
-        Result mSearch(string binFile, int x);
+        void mSearch(string binFile, int x);
+
+        
 };
 
 #endif

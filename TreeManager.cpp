@@ -1,3 +1,8 @@
+/*Participantes:
+Guilherme Borges de Pádua Barbosa - 15653045
+Daniel Natan dos Santos Brito - 15446902*/
+
+
 #include "TreeManager.h"
 #include <fstream>
 
@@ -26,9 +31,7 @@ void TreeManager::readAndWrite(string txtFile, string binFile){
     outFile.close();
 }
 
-TreeManager::Result TreeManager::mSearch(string binFile, int x){
-
-    Result result;
+void TreeManager::mSearch(string binFile, int x){
     ifstream file;
     file.open(binFile, ios::in);
     Node p, q;
@@ -42,12 +45,13 @@ TreeManager::Result TreeManager::mSearch(string binFile, int x){
                 index = i;
             }
         }
-        cout << index << endl;
-        cout << p.K[index] << endl;
+        //cout << index << endl;
+        //cout << p.K[index] << endl;
 
         if(x == p.K[index]){
-            cout << "Achou";
-            return result;
+            cout << "Achou" << endl;
+            cout << "(" << ", " << index << ", true)" << endl;
+            return;
             break;
         }else{     
             if(p.A[index] == 0){
@@ -59,7 +63,7 @@ TreeManager::Result TreeManager::mSearch(string binFile, int x){
            
         }
     }
-    cout << "Nao achou";
-    return result;
+    cout << "Nao achou" << endl;
+    return;
 }
 
