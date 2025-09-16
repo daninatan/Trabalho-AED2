@@ -1,13 +1,16 @@
 /*Participantes:
 Guilherme Borges de Pádua Barbosa - 15653045
-Daniel Natan dos Santos Brito - 15446902*/
+Daniel Natan dos Santos Brito - 15446902
+
+Resposta pergunta D) Não funciona. Sim, é esperado, pois ele sempre lê o primeiro registro como sendo a raiz, portanto, quando tiramos 
+a raíz do primeiro registro o algoritmo msearch não funciona.
+*/
 
 #include "TreeManager.h"
 
 using namespace std;
 
-void mSearchMenu(){
-    TreeManager T;
+void mSearchMenu(TreeManager T){
     int key;
     char confirmation;
 
@@ -41,5 +44,5 @@ int main(){
     treeManager.readAndWrite("mvias2.txt", "mvias2.bin");
     treeManager.readAndWrite("mvias2_2.txt", "mvias2_2.bin");
     treeManager.printTree("mvias.bin");
-    mSearchMenu();
+    mSearchMenu(treeManager);
 }
