@@ -13,23 +13,24 @@ using namespace std;
 #ifndef TREEMANAGER_H
 #define TREEMANAGER_H
 
-#define M 3 //quantidade de vias
 #define MAX INT_MAX //maior e menor int representável
-#define MIN INT_MIN;
+#define MIN INT_MIN
 
 class TreeManager{
+    int M;
 
-    struct Node {
-        int n;
-        int K[M - 1 + 2];
-        int A[M];
-    };  
+    struct Result {
+        int p;
+        int i;
+        bool success;
+    };
 
     public:
-
-        void readAndWrite(string txtFile, string binFile);
-        void mSearch(string binFile, int x);
-        void printTree(string binFile);     
+        TreeManager(int m);
+        Result mSearch(fstream& binFile, int x);
+        void insertB(fstream& binFile, int x);
+        int getParentIndex(fstream& binFile, int child);
+        void printTree(fstream& binFile);     
 };
 
 #endif

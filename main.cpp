@@ -6,11 +6,17 @@ Resposta pergunta D) Não funciona. Sim, é esperado, pois ele sempre lê o prim
 a raíz do primeiro registro o algoritmo msearch não funciona.
 */
 
+/*Abrir o arquivo fora da classe da árvore, fazer isso apenas uma vez e passar por parâmetro 
+(daria pra criar uma classe só pra manipular o arquivo talvez e passar um objeto com o arquivo 
+por parâmetro) Retornar uma estrutura com aquela tripla para poder fazer a 
+inserção Guardar de alguma forma a raiz no arquivo e sempre ler ela primeiro */
+
 #include "TreeManager.h"
+#include "FileManager.h"
 
 using namespace std;
 
-void mSearchMenu(TreeManager T){
+void mSearchMenu(TreeManager T, fstream& F){
     int key;
     char confirmation;
 
@@ -21,7 +27,7 @@ void mSearchMenu(TreeManager T){
             break;
         }
         
-        T.mSearch("mvias.bin", key);
+        T.mSearch(F, key);
         //T.mSearch("mvias2.bin", key);
         //T.mSearch("mvias2_2.bin", key);
 
@@ -39,10 +45,11 @@ void mSearchMenu(TreeManager T){
 }
 
 int main(){
-    TreeManager treeManager;
-    treeManager.readAndWrite("mvias.txt", "mvias.bin");
-    treeManager.readAndWrite("mvias2.txt", "mvias2.bin");
-    treeManager.readAndWrite("mvias2_2.txt", "mvias2_2.bin");
-    treeManager.printTree("mvias.bin");
-    mSearchMenu(treeManager);
+    TreeManager treeManager(3); //Tamanho 3 pra arvore, mas deixar como input
+    FileManager fileManager(3, "mvias.txt", "mvias.bin");
+    
+    treeManager.printTree(fileManager.binFile);
+    treeManager.insertB(fileManager.binFile, 16);
+    //mSearchMenu(treeManager, fileManager.binFile);
+    treeManager.printTree(fileManager.binFile);
 }
