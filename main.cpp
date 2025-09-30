@@ -13,43 +13,61 @@ inserção Guardar de alguma forma a raiz no arquivo e sempre ler ela primeiro *
 
 #include "TreeManager.h"
 #include "FileManager.h"
+#include <cstdlib>
 
 using namespace std;
 
-void mSearchMenu(TreeManager T, fstream& F){
-    int key;
+void menu(){
+    int key, m, choice, searchValue, insertValue;
     char confirmation;
+    TreeManager::Result searchResult;
+
+    cout << "Digite o valor de m: ";
+    cin >> m;
+    cout << "\n\n";
+
+    TreeManager T(m);
+    FileManager F(m, "mvias.txt", "mvias.bin");
 
     do{
-        cout << "Chave de busca: ";
-        if(!(cin >> key)){
-            cout << "Tipo inválido de chave" << endl;
-            break;
+        system("clear || cls");
+
+        cout << "1 - Imprimir o indice\n2 - Buscar elemento\n3 - Inserir elemento\n4 - Sair\n\n";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                T.printTree(F.binFile);
+                cin.ignore();
+                cin.get();
+                break;
+            case 2:
+                system("clear || cls");       
+                cout << "Escolha o valor para procurar: ";
+                cin >> searchValue;
+                searchResult = T.mSearch(F.binFile, searchValue);
+                cout << "\n\nResultado: (" << searchResult.i << ", " << searchResult.p << ", " << searchResult.success << ")";
+                cin.ignore();
+                cin.get();
+                break;
+            case 3:
+                system("clear || cls");
+                cout << "Digite um valor: ";
+                cin >> insertValue;
+                break;
+            case 4:
+                break;
+            default:
+                cout << "\nEscolha inválida, tente novamente";
+                cin.ignore();
+                cin.get();
         }
         
-        T.mSearch(F, key);
-        //T.mSearch("mvias2.bin", key);
-        //T.mSearch("mvias2_2.bin", key);
-
-        cout << "Continuar busca (s/n)? ";
-        cin >> confirmation;
-
-        if (confirmation == 'n')
-            break;
-        else if(confirmation != 's'){
-            cout << "Entrada inválida" << endl;
-            break;
-        }
-
-    }while(true);
+    }while(choice != 4);
 }
 
 int main(){
-    TreeManager treeManager(3); //Tamanho 3 pra arvore, mas deixar como input
-    FileManager fileManager(3, "mvias.txt", "mvias.bin");
-    
-    treeManager.printTree(fileManager.binFile);
-    treeManager.insertB(fileManager.binFile, 16);
-    //mSearchMenu(treeManager, fileManager.binFile);
-    treeManager.printTree(fileManager.binFile);
+    system("clear || cls");
+    menu();
+
 }

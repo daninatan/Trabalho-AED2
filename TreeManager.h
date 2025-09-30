@@ -19,13 +19,16 @@ using namespace std;
 class TreeManager{
     int M;
 
-    struct Result {
-        int p;
-        int i;
-        bool success;
-    };
+    
 
     public:
+
+        struct Result {
+            int p;
+            int i;
+            bool success;
+        };
+        
         TreeManager(int m);
         Result mSearch(fstream& binFile, int x);
         void insertB(fstream& binFile, int x);

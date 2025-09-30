@@ -27,12 +27,10 @@ TreeManager::Result TreeManager::mSearch(fstream& file, int x){
         }
 
         if(x == p.K[index]){
-            cout <<  "(" << q << ", " << index << ", true)" << endl; //retornado caso a chave tenha sido encontrada
             return {q, index, true};
             break;
         }else{     
             if(p.A[index] == 0){
-                cout << "(" << q << ", " << index << ", false)" << endl; //retornado caso a chave nao tenha sido encontrada
                 return {q, index, false};
                 break;
             }else{
