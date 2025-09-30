@@ -54,6 +54,7 @@ void menu(){
                 system("clear || cls");
                 cout << "Digite um valor: ";
                 cin >> insertValue;
+                T.insertB(F.binFile, insertValue);
                 break;
             case 4:
                 break;

@@ -19,8 +19,6 @@ using namespace std;
 class TreeManager{
     int M;
 
-    
-
     public:
 
         struct Result {
