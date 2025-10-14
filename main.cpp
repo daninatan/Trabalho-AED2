@@ -76,7 +76,7 @@ void menu(){
                 cin>> reg.age;
                 cout << "\nDigite a UF: ";
                 cin >> reg.uf;
-                if(T.insertB(binFile, key, database.lastB + 1)){
+                if(T.insertB(binFile, reg.key, database.lastB + 1)){
                     database.addRegister(reg);
                     database.lastB++;
                     cout << "\n\nAdicionado com sucesso!";
@@ -87,6 +87,7 @@ void menu(){
                 cin.get();
                 break;
             case 5:
+                T.updateRoot(0);
                 break;
             default:
                 cout << "\nEscolha inválida, tente novamente";

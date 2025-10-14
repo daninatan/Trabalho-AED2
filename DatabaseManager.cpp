@@ -31,6 +31,7 @@ void DatabaseManager::createTree(fstream& treeFile, TreeManager* tree){
 DatabaseManager::DatabaseReg DatabaseManager::search(int b){
     DatabaseReg reg;
     databaseBinary.open(databaseBinaryName, ios::in | ios::binary);
+    databaseBinary.clear(); 
     databaseBinary.seekg((b-1) * sizeof(DatabaseReg), ios::beg);
     databaseBinary.read((char*)(&reg), sizeof(DatabaseReg));
     databaseBinary.close();
@@ -52,6 +53,7 @@ void DatabaseManager::addRegister(DatabaseManager::DatabaseReg reg){
     databaseFile.open(databaseFileName, ios::app);
     databaseBinary.open(databaseBinaryName, ios::app | ios::binary);
     databaseFile << reg.key << " " << reg.name << " " << reg.age << " " << reg.uf << "\n";
+    databaseBinary.seekp(0, ios::end);
     databaseBinary.write((const char *)(&reg), sizeof(DatabaseReg));
     databaseBinary.close();
     databaseFile.close();

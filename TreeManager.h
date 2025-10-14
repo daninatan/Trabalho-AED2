@@ -18,6 +18,7 @@ using namespace std;
 
 class TreeManager{
     int M;
+    int root;
 
     public:
 
@@ -31,7 +32,10 @@ class TreeManager{
         Result mSearch(fstream& binFile, int x, int *b = nullptr);
         int insertB(fstream& binFile, int x, int b);
         int getParentIndex(fstream& binFile, int child);
-        void printTree(fstream& binFile);     
+        void printTree(fstream& binFile);  
+        int getRoot();
+        void updateRoot(int newRoot);   
+        int getNextIndex(fstream& binfile);
 };
 
 #endif
