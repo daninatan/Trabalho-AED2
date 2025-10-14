@@ -1,3 +1,7 @@
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//OBS: CLASSE UTILIZADA PARA LER E ESCREVER MVIAS.TXT, NO ENTANTO NAO ESTÁ SENDO USADO NESSA PARTE DO TRABALHO
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #include <iostream>
 #include <fstream>
 #include "FileManager.h"

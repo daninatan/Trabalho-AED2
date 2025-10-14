@@ -1,3 +1,7 @@
+/*Participantes:
+Guilherme Borges de Pádua Barbosa - 15653045
+Daniel Natan dos Santos Brito - 15446902*/
+
 #include "DatabaseManager.h"
 
 DatabaseManager::DatabaseManager(string databaseFileName, string databaseBinaryName){
@@ -6,7 +10,8 @@ DatabaseManager::DatabaseManager(string databaseFileName, string databaseBinaryN
     writeBinary();
 }
 
-void DatabaseManager::write(){
+//printa a database
+void DatabaseManager::print(){
     system("clear || cls");
     databaseFile.open(databaseFileName, ios::in);
     cout << "Chave, Nome, Idade, UF\n\n";
@@ -17,6 +22,7 @@ void DatabaseManager::write(){
     databaseFile.close();
 }
 
+//cria uma árvore com base nos dados da base de dados, a partir do m do usuario
 void DatabaseManager::createTree(fstream& treeFile, TreeManager* tree){
     DatabaseManager::DatabaseReg reg;
     databaseBinary.open(databaseBinaryName, ios::in | ios::binary);
@@ -28,6 +34,7 @@ void DatabaseManager::createTree(fstream& treeFile, TreeManager* tree){
     }
 }
 
+//busca um registro a partir do b
 DatabaseManager::DatabaseReg DatabaseManager::search(int b){
     DatabaseReg reg;
     databaseBinary.open(databaseBinaryName, ios::in | ios::binary);
@@ -38,6 +45,7 @@ DatabaseManager::DatabaseReg DatabaseManager::search(int b){
     return reg;
 }
 
+//escreve um arquivo binario com a base de dados para procurar os registros a partir do b
 void DatabaseManager::writeBinary(){
     DatabaseReg reg;
     databaseFile.open(databaseFileName, ios::in);
@@ -49,6 +57,7 @@ void DatabaseManager::writeBinary(){
     databaseFile.close();
 }
 
+//adiciona um registro na database, tanto no txt quanto no biário
 void DatabaseManager::addRegister(DatabaseManager::DatabaseReg reg){
     databaseFile.open(databaseFileName, ios::app);
     databaseBinary.open(databaseBinaryName, ios::app | ios::binary);

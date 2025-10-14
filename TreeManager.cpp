@@ -82,18 +82,17 @@ int TreeManager::insertB(fstream& binFile, int x, int b) {
         return 1;
     }
 
-    int currentP_Index = result.p; // Índice do nó P atual
-    int insertion_i = result.i;     // Índice do ponteiro (A[i])
-    int parentIndex = 0;            // CORREÇÃO: Escopo de parentIndex
-    int mid = 0;                    // CORREÇÃO: Escopo de mid
-    int indexQ = 0;                 // CORREÇÃO: Escopo de indexQ
+    int currentP_Index = result.p; 
+    int insertion_i = result.i;     
+    int parentIndex = 0;            
+    int mid = 0;                   
+    int indexQ = 0;                 
 
     while(true) {
         Node p(M);
         binFile.seekg((currentP_Index - 1) * sizeof(Node), ios::beg);
         binFile.read((char*)(&p), sizeof(Node));
 
-        // 1. Inserção na Posição Encontrada
         // Move elementos para a direita
         for (int j = p.n; j > insertion_i; j--){
             p.K[j + 1] = p.K[j];
@@ -101,7 +100,6 @@ int TreeManager::insertB(fstream& binFile, int x, int b) {
             p.B[j + 1] = p.B[j];
         }
 
-        // Insere o valor promovido (K) e o ponteiro para o novo nó (A)
         p.K[insertion_i + 1] = K;
         p.A[insertion_i + 1] = A; // A é o índice do novo nó Q ou 0 se folha
         p.B[insertion_i + 1] = B;
@@ -113,7 +111,6 @@ int TreeManager::insertB(fstream& binFile, int x, int b) {
             return 1;
         }
 
-        // 2. Split do nó
         if (M == 2 && p.n == 2) {
             mid = 2; 
         } else {
@@ -138,41 +135,34 @@ int TreeManager::insertB(fstream& binFile, int x, int b) {
         binFile.write((const char*)(&p), sizeof(Node));
 
         // Escreve Q no final 
-        indexQ = getNextIndex(binFile); // Usa a variável indexQ no escopo correto
+        indexQ = getNextIndex(binFile); 
         binFile.seekp(0, ios::end);
         binFile.write((const char*)(&q), sizeof(Node));
 
-        // 3. Promove a chave do meio e busca o pai
         K = p.K[mid];
         B = p.B[mid];
-        A = indexQ; // A é o ponteiro para o novo nó Q (lado direito do split)
+        A = indexQ; 
         
         parentIndex = getParentIndex(binFile, currentP_Index);
         
         if(parentIndex == 0) break; // Chegou na raiz
 
-        // 4. Configura para a próxima iteração no nó pai (parentIndex)
         currentP_Index = parentIndex;
         
-        // Lê o nó pai (parent) para determinar a posição de inserção do K promovido
         Node parent(M);
         binFile.seekg((parentIndex - 1) * sizeof(Node), ios::beg);
         binFile.read((char*)(&parent), sizeof(Node));
         
-        // Encontra a posição de inserção (insertion_i) da chave K no nó pai
-        // ATENÇÃO: Fazemos a busca local no nó pai para o 'K' promovido!
         insertion_i = 0;
         for(int i = 1; i <= parent.n; i++){
             if(K < parent.K[i]){
                 insertion_i = i - 1;
                 break;
             }
-            // Se o loop terminar, insertion_i será o índice do último ponteiro (parent.n)
             insertion_i = i; 
         }
     }
 
-    // 5. Cria nova raiz (Se parentIndex == 0)
     if(parentIndex == 0) { 
         int oldRootIndex = getRoot();
         int newRootIndex = getNextIndex(binFile);
@@ -180,8 +170,8 @@ int TreeManager::insertB(fstream& binFile, int x, int b) {
         Node root(M);
         root.n = 1;
         root.K[1] = K;
-        root.A[0] = oldRootIndex; // P original (lado esquerdo)
-        root.A[1] = A; // Q novo (lado direito)
+        root.A[0] = oldRootIndex; 
+        root.A[1] = A; 
         root.B[1] = B;
 
         binFile.seekp(0, ios::end);

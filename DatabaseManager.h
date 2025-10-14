@@ -1,3 +1,8 @@
+/*Participantes:
+Guilherme Borges de Pádua Barbosa - 15653045
+Daniel Natan dos Santos Brito - 15446902*/
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -19,9 +24,9 @@ class DatabaseManager{
         void writeBinary();
 
     public:
-        int lastB;
+        int lastB; //guarda o valor do ultimo b para a funcao de adicionar
 
-        struct DatabaseReg{
+        struct DatabaseReg{ //estrutura para os registros
             int key;
             char name[100];
             int age;
@@ -29,7 +34,7 @@ class DatabaseManager{
         };
 
         DatabaseManager(string databaseFileName, string databaseBinaryName);
-        void write();
+        void print();
         DatabaseReg search(int b);
         void addRegister(DatabaseReg reg);
         void createTree(fstream& treeFile, TreeManager* tree);

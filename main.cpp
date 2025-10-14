@@ -47,7 +47,7 @@ void menu(){
                 cin.get();
                 break;
             case 2:
-                database.write();
+                database.print();
                 cin.ignore();
                 cin.get();
                 break;
@@ -61,6 +61,8 @@ void menu(){
                     reg = database.search(bResult);
                     cout << "\n\nRegistro:\n\n";
                     cout << reg.key << " " << reg.name << " " << reg.age << " " << reg.uf << "\n";
+                }else{
+                    cout << "\n\nRegistro nao encontrado!\n\n";
                 }
                 
                 cin.ignore();
@@ -88,6 +90,7 @@ void menu(){
                 break;
             case 5:
                 T.updateRoot(0);
+                binFile.close();
                 break;
             default:
                 cout << "\nEscolha inválida, tente novamente";
