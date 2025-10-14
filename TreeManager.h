@@ -28,8 +28,8 @@ class TreeManager{
         };
         
         TreeManager(int m);
-        Result mSearch(fstream& binFile, int x);
-        void insertB(fstream& binFile, int x);
+        Result mSearch(fstream& binFile, int x, int *b = nullptr);
+        int insertB(fstream& binFile, int x, int b);
         int getParentIndex(fstream& binFile, int child);
         void printTree(fstream& binFile);     
 };

@@ -8,8 +8,9 @@ using namespace std;
 struct Node {
     int M; //tamanho
     int n;
-    int K[10]; //valor máximo
-    int A[10]; 
+    int K[50]; //valor máximo
+    int A[50]; 
+    int B[50];
 
     Node(int m) : M(m) { //inicialização
         for(int i = 0; i < M; i++)

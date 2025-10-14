@@ -17,6 +17,7 @@ private:
 public:
     fstream txtFile;
     fstream binFile;
+    fstream databaseFile;
     FileManager(int m, string txtFile, string binFile);
     void readAndWrite(ostream& binFile);
 };

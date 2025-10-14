@@ -27,9 +27,10 @@ void FileManager::readAndWrite(ostream& binFile){ //recebe tanto ofstrem e fstre
         treeNode.K[n+1] = MAX;
         txtFile >> treeNode.A[0]; //Le a primeira subarvore
 
-        for(int i = 1; i <= treeNode.n; i++){ //Le as respectivas chaves e as respectivas subarvores, de acordo com o valor N
+        for(int i = 1; i <= treeNode.n; i++){ //Le as respectivas chaves, subarvores e referencias para o arquivo principal de acordo com o valor N
             txtFile >> treeNode.K[i];
             txtFile >> treeNode.A[i];
+            txtFile >> treeNode.B[i];
         }  
         
         // Escrever os dados da estrutura sequencialmente
