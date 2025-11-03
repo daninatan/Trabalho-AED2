@@ -189,10 +189,10 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
     int i = result.i;
 
     Node node(M);
-    b = node.B[i]; //atualiza a raíz para alterar o txt
 
     binFile.seekg((currentIndex - 1) * sizeof(Node), ios::beg);
     binFile.read((char *)(&node), sizeof(Node));
+    b = node.B[i]; //atualiza a raíz para alterar o txt
 
     //chave na folha
     if (node.A[0] == 0) {

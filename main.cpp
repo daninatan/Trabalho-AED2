@@ -19,10 +19,9 @@ inserção Guardar de alguma forma a raiz no arquivo e sempre ler ela primeiro *
 using namespace std;
 
 void menu(){
-    int key, m, choice, searchValue, bResult, root = 0, findB;
+    int key, m, choice, searchValue, bResult, root = 0, findB, removeB;
     char confirmation, reconstruct;
     TreeManager::Result searchResult;
-    DatabaseManager database("database.txt", "database.bin");
     DatabaseManager::DatabaseReg reg;
     fstream binFile;
 
@@ -50,8 +49,9 @@ void menu(){
     }
     
     TreeManager T(m, root);
+    DatabaseManager database("database.txt", "database.bin", reconstruct);
 
-    if(reconstruct == 's'){
+     if(reconstruct == 's'){
         database.createTree(binFile, &T);
     }
     
@@ -114,9 +114,9 @@ void menu(){
                 system("clear || cls");
                 cout << "Digite a chave: ";
                 cin >> reg.key;
-                int b; //vai retornar esse b para excluir no arquivo binario principal
 
-                if(T.deleteB(binFile, reg.key, b)){
+                if(T.deleteB(binFile, reg.key, removeB)){
+                    database.removeRegister(removeB);
                     cout << "\n\nRegistro Removido";
                 }else{
                     cout << "\n\nNão existe esta chave";

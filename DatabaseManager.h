@@ -33,10 +33,11 @@ class DatabaseManager{
             char uf[3];
         };
 
-        DatabaseManager(string databaseFileName, string databaseBinaryName);
+        DatabaseManager(string databaseFileName, string databaseBinaryName, char reconstruct);
         void print();
         DatabaseReg search(int b);
         void addRegister(DatabaseReg reg, int b);
+        void removeRegister(int b);
         void createTree(fstream& treeFile, TreeManager* tree);
         int findB();
 };
