@@ -37,7 +37,7 @@ void menu(){
     do{
         system("clear || cls");
 
-        cout << "1 - Imprimir o indice\n2 - Imprimir Arquivo Principal\n3 - Buscar elemento\n4 - Inserir elemento\n5 - Sair\n\n";
+        cout << "1 - Imprimir o indice\n2 - Imprimir Arquivo Principal\n3 - Buscar elemento\n4 - Inserir elemento\n5 - Remover Elemento\n6 - Sair\n\n";
         cin >> choice;
 
         switch (choice) {
@@ -89,6 +89,21 @@ void menu(){
                 cin.get();
                 break;
             case 5:
+                system("clear || cls");
+                cout << "Digite a chave: ";
+                cin >> reg.key;
+                int variavelBTemporariaParaTestar;
+
+                if(T.deleteB(binFile, reg.key, variavelBTemporariaParaTestar)){
+                    cout << "\n\nDeu certo aff";
+                }else{
+                    cout << "\n\nNão existe esta chave";
+                }
+                cin.ignore();
+                cin.get();
+                
+                break;
+            case 6:
                 T.updateRoot(0);
                 binFile.close();
                 break;
@@ -98,7 +113,7 @@ void menu(){
                 cin.get();
         }
         
-    }while(choice != 5);
+    }while(choice != 6);
 }
 
 int main(){

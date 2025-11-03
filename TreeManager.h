@@ -31,6 +31,10 @@ class TreeManager{
         TreeManager(int m);
         Result mSearch(fstream& binFile, int x, int *b = nullptr);
         int insertB(fstream& binFile, int x, int b);
+        int deleteB(fstream& binFile, int x, int &b);
+        void removeFromNode(fstream& binFile, int nodeIndex, int key);
+        void balanceAfterRemove(fstream& binFile, int nodeIndex);
+        void fuseNodes(fstream& binFile, int parentIndex, int leftPos, int rightPos);
         int getParentIndex(fstream& binFile, int child);
         void printTree(fstream& binFile);  
         int getRoot();
