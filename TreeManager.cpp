@@ -9,12 +9,8 @@ Daniel Natan dos Santos Brito - 15446902*/
 #include <vector>
 #include <string>
 
-TreeManager::TreeManager(int m) : M(m) {
-    fstream rootFile("root.txt", ios::in);
-    int rootValue;
-    rootFile >> rootValue;
-    this->root = rootValue;
-    rootFile.close();
+TreeManager::TreeManager(int m, int root) : M(m) {
+    updateRoot(root);
 }
 
 TreeManager::Result TreeManager::mSearch(fstream& file, int x, int* b){
@@ -457,14 +453,15 @@ void TreeManager::printTree(fstream& file){
     file.seekg(0, ios::beg);
     
     while(file.read((char*)(&p), sizeof(Node))){
-        
-        cout << index << "  ";
-        cout << p.n << "  ";
-        cout << p.A[0] << ",    ";
-        for(int i = 1; i <= p.n; i++){
-            cout << "(" << p.K[i] << ",    " << p.A[i] << ",    " << p.B[i] << ")  ";
+        if(p.n != 0){
+            cout << index << "  ";
+            cout << p.n << "  ";
+            cout << p.A[0] << ",    ";
+            for(int i = 1; i <= p.n; i++){
+                cout << "(" << p.K[i] << ",    " << p.A[i] << ",    " << p.B[i] << ")  ";
+            }
+            cout << endl;
         }
-        cout << endl;
         index++;
     }
     cout << "=========================================================\n\n";
@@ -479,8 +476,8 @@ int TreeManager::getRoot(){
 
 
 void TreeManager::updateRoot(int newRoot){
-    fstream rootFile("root.txt", ios::out | ios::trunc);
-    rootFile << newRoot;
+    fstream rootFile("treeInfo.txt", ios::out | ios::trunc);
+    rootFile << newRoot << " " << M;
     this->root = newRoot;
     rootFile.close();
 }

@@ -19,20 +19,42 @@ inserção Guardar de alguma forma a raiz no arquivo e sempre ler ela primeiro *
 using namespace std;
 
 void menu(){
-    int key, m, choice, searchValue, bResult;
-    char confirmation;
+    int key, m, choice, searchValue, bResult, root = 0, findB;
+    char confirmation, reconstruct;
     TreeManager::Result searchResult;
     DatabaseManager database("database.txt", "database.bin");
     DatabaseManager::DatabaseReg reg;
+    fstream binFile;
 
-    cout << "Digite o valor de m: ";
-    cin >> m;
+    fstream treeInfoFile("treeInfo.txt", ios::in | ios::out);
+
+    //checa se o usuário quer reconstruir a árvore com um novo valor de m, se nao, utiliza a ultima arvore gerada
+    cout << "Deseja reconstruir a árvore? (s/n): ";
+    cin >> reconstruct;
     cout << "\n\n";
+    if(reconstruct == 's'){
+        fstream treeInfoFile("treeInfo.txt", ios::in | ios::out | ios::trunc);
 
-   // FileManager F(m, "mvias.txt", "mvias.bin");
-    fstream binFile("mvias.bin", ios::in | ios::out | ios::binary | ios::trunc);
-    TreeManager T(m);
-    database.createTree(binFile, &T);
+        cout << "Digite o valor de m: ";
+        cin >> m;
+        cout << "\n\n";
+
+        treeInfoFile << 0 << " " << m;
+        binFile.open("mvias.bin", ios::in | ios::out | ios::binary | ios::trunc);
+        treeInfoFile.close();
+    }else{
+        fstream treeInfoFile("treeInfo.txt", ios::in | ios::out);
+        treeInfoFile >> root >> m;
+        binFile.open("mvias.bin", ios::in | ios::out | ios::binary);
+        treeInfoFile.close();
+    }
+    
+    TreeManager T(m, root);
+
+    if(reconstruct == 's'){
+        database.createTree(binFile, &T);
+    }
+    
 
     do{
         system("clear || cls");
@@ -78,9 +100,9 @@ void menu(){
                 cin>> reg.age;
                 cout << "\nDigite a UF: ";
                 cin >> reg.uf;
-                if(T.insertB(binFile, reg.key, database.lastB + 1)){
-                    database.addRegister(reg);
-                    database.lastB++;
+                findB = database.findB();
+                if(T.insertB(binFile, reg.key, findB)){
+                    database.addRegister(reg, findB);
                     cout << "\n\nAdicionado com sucesso!";
                 }else{
                     cout << "\n\nJá existe esta chave";
@@ -92,10 +114,10 @@ void menu(){
                 system("clear || cls");
                 cout << "Digite a chave: ";
                 cin >> reg.key;
-                int variavelBTemporariaParaTestar;
+                int b; //vai retornar esse b para excluir no arquivo binario principal
 
-                if(T.deleteB(binFile, reg.key, variavelBTemporariaParaTestar)){
-                    cout << "\n\nDeu certo aff";
+                if(T.deleteB(binFile, reg.key, b)){
+                    cout << "\n\nRegistro Removido";
                 }else{
                     cout << "\n\nNão existe esta chave";
                 }
@@ -104,7 +126,6 @@ void menu(){
                 
                 break;
             case 6:
-                T.updateRoot(0);
                 binFile.close();
                 break;
             default:

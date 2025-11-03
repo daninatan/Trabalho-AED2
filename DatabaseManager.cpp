@@ -10,7 +10,7 @@ DatabaseManager::DatabaseManager(string databaseFileName, string databaseBinaryN
     writeBinary();
 }
 
-//printa a database
+//printa a database (MUDAR PARA ARQUIVO BINARIO!!!!!!!!!!!!!!!!!!!!!!!!1)
 void DatabaseManager::print(){
     system("clear || cls");
     databaseFile.open(databaseFileName, ios::in);
@@ -29,7 +29,6 @@ void DatabaseManager::createTree(fstream& treeFile, TreeManager* tree){
     int i = 1;
     while(databaseBinary.read((char *)(&reg), sizeof(DatabaseReg))){
         tree->insertB(treeFile, reg.key, i);
-        lastB = i;
         i++;
     }
 }
@@ -51,6 +50,7 @@ void DatabaseManager::writeBinary(){
     databaseFile.open(databaseFileName, ios::in);
     databaseBinary.open(databaseBinaryName, ios::out | ios::binary);
     while(databaseFile >> reg.key >> reg.name >> reg.age >> reg.uf){
+        reg.active = true;
         databaseBinary.write((const char *)(&reg), sizeof(DatabaseReg));
     }
     databaseBinary.close();
@@ -58,12 +58,28 @@ void DatabaseManager::writeBinary(){
 }
 
 //adiciona um registro na database, tanto no txt quanto no biário
-void DatabaseManager::addRegister(DatabaseManager::DatabaseReg reg){
-    databaseFile.open(databaseFileName, ios::app);
-    databaseBinary.open(databaseBinaryName, ios::app | ios::binary);
-    databaseFile << reg.key << " " << reg.name << " " << reg.age << " " << reg.uf << "\n";
-    databaseBinary.seekp(0, ios::end);
+void DatabaseManager::addRegister(DatabaseManager::DatabaseReg reg, int b){
+    int index = 1;
+    databaseBinary.open(databaseBinaryName, ios::binary);
+    databaseBinary.seekp((b - 1) * sizeof(DatabaseReg), ios::beg);
     databaseBinary.write((const char *)(&reg), sizeof(DatabaseReg));
+
     databaseBinary.close();
-    databaseFile.close();
+}
+
+int DatabaseManager::findB(){
+    DatabaseReg reg;
+    int index = 1;
+    databaseBinary.open(databaseBinaryName, ios::in | ios::binary);
+    databaseBinary.seekp(0, ios::beg);
+    while(databaseBinary.read((char *)(&reg), sizeof(DatabaseReg))){
+        if(!reg.active){
+            databaseBinary.close();
+            return index;
+            break;
+        }
+        index++;
+    }
+    databaseBinary.close();
+    return index;
 }

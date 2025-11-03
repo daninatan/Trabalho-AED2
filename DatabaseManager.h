@@ -24,9 +24,9 @@ class DatabaseManager{
         void writeBinary();
 
     public:
-        int lastB; //guarda o valor do ultimo b para a funcao de adicionar
 
-        struct DatabaseReg{ //estrutura para os registros
+        struct DatabaseReg{
+            bool active; //estrutura para os registros
             int key;
             char name[100];
             int age;
@@ -36,8 +36,9 @@ class DatabaseManager{
         DatabaseManager(string databaseFileName, string databaseBinaryName);
         void print();
         DatabaseReg search(int b);
-        void addRegister(DatabaseReg reg);
+        void addRegister(DatabaseReg reg, int b);
         void createTree(fstream& treeFile, TreeManager* tree);
+        int findB();
 };
 
 #endif 

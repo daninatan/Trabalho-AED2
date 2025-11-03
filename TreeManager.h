@@ -28,7 +28,7 @@ class TreeManager{
             bool success;
         };
         
-        TreeManager(int m);
+        TreeManager(int m, int root);
         Result mSearch(fstream& binFile, int x, int *b = nullptr);
         int insertB(fstream& binFile, int x, int b);
         int deleteB(fstream& binFile, int x, int &b);
