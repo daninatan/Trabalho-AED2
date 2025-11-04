@@ -4,22 +4,27 @@ Daniel Natan dos Santos Brito - 15446902*/
 
 #include "DatabaseManager.h"
 
-DatabaseManager::DatabaseManager(string databaseFileName, string databaseBinaryName){
+DatabaseManager::DatabaseManager(string databaseFileName, string databaseBinaryName, char reconstruct){
     this->databaseFileName = databaseFileName;
     this->databaseBinaryName = databaseBinaryName;
-    writeBinary();
+    if(reconstruct == 's'){
+        writeBinary();
+    }   
 }
 
-//printa a database (MUDAR PARA ARQUIVO BINARIO!!!!!!!!!!!!!!!!!!!!!!!!1)
 void DatabaseManager::print(){
     system("clear || cls");
-    databaseFile.open(databaseFileName, ios::in);
+    databaseBinary.open(databaseBinaryName, ios::in | ios::binary);
+    databaseBinary.clear();
+    databaseBinary.seekg(0, ios::beg);
     cout << "Chave, Nome, Idade, UF\n\n";
     DatabaseReg reg;
-    while(databaseFile >> reg.key >> reg.name >> reg.age >> reg.uf){
-        cout << reg.key << " " << reg.name << " " << reg.age << " " << reg.uf << "\n";
+    while(databaseBinary.read((char *)(&reg), sizeof(DatabaseReg))){
+        if(reg.active){
+            cout << reg.key << " " << reg.name << " " << reg.age << " " << reg.uf << "\n";
+        }
     }
-    databaseFile.close();
+    databaseBinary.close();
 }
 
 //cria uma árvore com base nos dados da base de dados, a partir do m do usuario
@@ -60,10 +65,9 @@ void DatabaseManager::writeBinary(){
 //adiciona um registro na database, tanto no txt quanto no biário
 void DatabaseManager::addRegister(DatabaseManager::DatabaseReg reg, int b){
     int index = 1;
-    databaseBinary.open(databaseBinaryName, ios::binary);
+    databaseBinary.open(databaseBinaryName, ios::in | ios::out | ios::binary);
     databaseBinary.seekp((b - 1) * sizeof(DatabaseReg), ios::beg);
     databaseBinary.write((const char *)(&reg), sizeof(DatabaseReg));
-
     databaseBinary.close();
 }
 
@@ -71,15 +75,26 @@ int DatabaseManager::findB(){
     DatabaseReg reg;
     int index = 1;
     databaseBinary.open(databaseBinaryName, ios::in | ios::binary);
-    databaseBinary.seekp(0, ios::beg);
+    databaseBinary.clear();
+    databaseBinary.seekg(0, ios::beg);
     while(databaseBinary.read((char *)(&reg), sizeof(DatabaseReg))){
         if(!reg.active){
             databaseBinary.close();
             return index;
-            break;
         }
         index++;
     }
     databaseBinary.close();
     return index;
+}
+
+void DatabaseManager::removeRegister(int b){
+    DatabaseReg reg;
+    databaseBinary.open(databaseBinaryName, ios::in | ios::out | ios::binary);
+    databaseBinary.seekg((b-1) * sizeof(DatabaseReg), ios::beg);
+    databaseBinary.read((char *)(&reg), sizeof(DatabaseReg));
+    reg.active = false;
+    databaseBinary.seekp((b-1) * sizeof(DatabaseReg), ios::beg);
+    databaseBinary.write((const char *)(&reg), sizeof(DatabaseReg));
+    databaseBinary.close();
 }

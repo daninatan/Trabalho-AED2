@@ -189,6 +189,7 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
     int i = result.i;
 
     Node node(M);
+
     binFile.seekg((currentIndex - 1) * sizeof(Node), ios::beg);
     binFile.read((char *)(&node), sizeof(Node)); //le o arquivo para escrever o nó
 
