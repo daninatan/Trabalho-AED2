@@ -181,8 +181,8 @@ int TreeManager::insertB(fstream& binFile, int x, int b) {
 int TreeManager::deleteB(fstream& binFile, int x, int &b){
     Result result = mSearch(binFile, x);
 
-    if(!result.success){
-        return 0;     //não achou
+    if(!result.success){ //nao achou
+        return 0;
     }
 
     int currentIndex = result.p;
@@ -191,10 +191,11 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
     Node node(M);
 
     binFile.seekg((currentIndex - 1) * sizeof(Node), ios::beg);
-    binFile.read((char *)(&node), sizeof(Node));
-    b = node.B[i]; //atualiza a raíz para alterar o txt
+    binFile.read((char *)(&node), sizeof(Node)); //le o arquivo para escrever o nó
 
-    //chave na folha
+    b = node.B[i]; //altera a marcação da raíz
+
+    //chave em nó folha
     if (node.A[0] == 0) {
         for (int j = i; j < node.n; j++) {
             node.K[j] = node.K[j + 1];
@@ -205,30 +206,44 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
         binFile.seekp((currentIndex - 1) * sizeof(Node), ios::beg);
         binFile.write((const char*)(&node), sizeof(Node));
 
-        balanceAfterRemove(binFile, currentIndex); // balanceia se necessário
+        balanceAfterRemove(binFile, currentIndex); //balanceia se necessário
         return 1;
     }
 
-    //Chave no nó interno
+    //chave em nó interno
     int predIndex = node.A[i - 1];
     Node predNode(M);
 
     while (true) {
         binFile.seekg((predIndex - 1) * sizeof(Node), ios::beg);
         binFile.read((char*)(&predNode), sizeof(Node));
-        if (predNode.A[predNode.n] == 0) break; // folha
+        if (predNode.A[predNode.n] == 0) break;
         predIndex = predNode.A[predNode.n];
     }
 
-    //Substitui chave
+    //substitui a chave
     node.K[i] = predNode.K[predNode.n];
     node.B[i] = predNode.B[predNode.n];
 
     binFile.seekp((currentIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&node), sizeof(Node));
+    binFile.flush();
 
-    //Remove o predecessor
+    //remove do predecessor
     removeFromNode(binFile, predIndex, predNode.K[predNode.n]);
+
+    //verifica se a raíz ficou vazia
+    if (currentIndex == getRoot()) {
+        Node rootCheck(M);
+        binFile.seekg((currentIndex - 1) * sizeof(Node), ios::beg);
+        binFile.read((char*)(&rootCheck), sizeof(Node));
+        
+        //se a raiz tem 0 chaves OU chave inválida (K[1]=0) e tem filho
+        if (rootCheck.A[0] != 0 && (rootCheck.n == 0 || (rootCheck.n == 1 && rootCheck.K[1] == 0))) {
+            updateRoot(rootCheck.A[0]);
+        }
+    }
+
     return 1;
 }
 
@@ -240,36 +255,68 @@ void TreeManager::removeFromNode(fstream& binFile, int nodeIndex, int key) {
     int i = 1;
     while (i <= node.n && node.K[i] != key) i++;
 
-    if (i > node.n) return; //não encontrado
+    if (i > node.n) {
+        return;
+    }
+
+    //remove a chave
     for (int j = i; j < node.n; j++) {
         node.K[j] = node.K[j + 1];
         node.B[j] = node.B[j + 1];
     }
     node.n--;
 
+    //limpa campos que sobraram
+    node.K[node.n + 1] = 0;
+    node.B[node.n + 1] = 0;
+    node.A[node.n + 1] = 0;
+
+    //escreve no arquivo
     binFile.seekp((nodeIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&node), sizeof(Node));
+    binFile.flush();
 
-    balanceAfterRemove(binFile, nodeIndex);
+    // adiciona verificação imediata para a raíz
+    if (nodeIndex == getRoot() && node.n == 0 && node.A[0] != 0) {
+        updateRoot(node.A[0]);
+        return; // Não precisa balancear mais
+    }
+
+    //propaga o balanceamento
+    int cur = nodeIndex;
+    while (cur > 0) {
+        balanceAfterRemove(binFile, cur);
+
+        int parent = getParentIndex(binFile, cur);
+
+        if (parent <= 0) break;
+        cur = parent;
+    }
 }
+
 
 void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
     Node node(M);
     binFile.seekg((nodeIndex - 1) * sizeof(Node), ios::beg);
     binFile.read((char*)(&node), sizeof(Node));
+    binFile.flush();
 
     int minKeys = (M / 2) - 1; // número mínimo de chaves
-    if (node.n >= minKeys) return; // já está balanceado
-
+    
     int parentIndex = getParentIndex(binFile, nodeIndex);
+
     if (parentIndex == 0) {
-        // se for a raiz
+        // Re-lê para garantir dados atualizados
+        binFile.seekg((nodeIndex - 1) * sizeof(Node), ios::beg);
+        binFile.read((char*)(&node), sizeof(Node));
+        
         if (node.n == 0 && node.A[0] != 0) {
-            updateRoot(node.A[0]); // reduz altura
+            updateRoot(node.A[0]);
         }
         return;
     }
 
+    if (node.n >= minKeys) return; // já está balanceado
     //lê o nó pai
     Node parent(M);
     binFile.seekg((parentIndex - 1) * sizeof(Node), ios::beg);
@@ -281,7 +328,7 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
         if (parent.A[i] == nodeIndex) { pos = i; break; }
     }
 
-    //Tenta redistribuir com o irmão esquerdo
+    //tenta redistribuir com o irmão esquerdo
     if (pos > 0) {
         int leftIndex = parent.A[pos - 1];
         Node left(M);
@@ -364,7 +411,7 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
         }
     }
 
-    //Caso contrário, realiza fusão
+    //caso contrário, realiza fusão
     if (pos > 0) {
         fuseNodes(binFile, parentIndex, pos - 1, pos); //funde com o irmão esquerdo
     } else {
@@ -410,9 +457,11 @@ void TreeManager::fuseNodes(fstream& binFile, int parentIndex, int leftPos, int 
     binFile.seekp((parentIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&parent), sizeof(Node));
 
-    //Se o pai ficou vazio e era raiz → atualiza
+    //se o pai ficou vazio e era raiz então atualiza
     if (parentIndex == getRoot() && parent.n == 0) {
+        binFile.flush();
         updateRoot(leftIndex);
+        return;
     }
 
     balanceAfterRemove(binFile, parentIndex);
@@ -479,6 +528,7 @@ void TreeManager::updateRoot(int newRoot){
     fstream rootFile("treeInfo.txt", ios::out | ios::trunc);
     rootFile << newRoot << " " << M;
     this->root = newRoot;
+
     rootFile.close();
 }
 
