@@ -40,6 +40,7 @@ class TreeManager{
         int getRoot();
         void updateRoot(int newRoot);   
         int getNextIndex(fstream& binfile);
+        void checkAndUpdateRoot(fstream& binFile);
 };
 
 #endif
