@@ -191,58 +191,66 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
     Node node(M);
 
     binFile.seekg((currentIndex - 1) * sizeof(Node), ios::beg);
-    binFile.read((char *)(&node), sizeof(Node)); //le o arquivo para escrever o nó
+    binFile.read((char *)(&node), sizeof(Node));
 
-    b = node.B[i]; //altera a marcação da raíz
+    b = node.B[i];
 
     //chave em nó folha
     if (node.A[0] == 0) {
+        // shift left: copiar de i+1 .. n para i .. n-1 (evita ler K[n+1])
         for (int j = i; j < node.n; j++) {
             node.K[j] = node.K[j + 1];
             node.B[j] = node.B[j + 1];
         }
+        // limpa última posição
+        node.K[node.n] = 0;
+        node.B[node.n] = 0;
         node.n--;
 
         binFile.seekp((currentIndex - 1) * sizeof(Node), ios::beg);
         binFile.write((const char*)(&node), sizeof(Node));
+        binFile.flush();
 
-        balanceAfterRemove(binFile, currentIndex); //balanceia se necessário
+        // Se não é raiz E ficou com poucas chaves, balanceia
+        if (currentIndex != getRoot()) {
+            balanceAfterRemove(binFile, currentIndex);
+        }
+        
+        // Verifica raiz após balanceamento
+        checkAndUpdateRoot(binFile);
         return 1;
     }
 
-    //chave em nó interno
+    //chave em nó interno - busca predecessor (maior chave da subárvore esquerda)
     int predIndex = node.A[i - 1];
     Node predNode(M);
 
+    // Vai sempre para o filho mais à direita até encontrar uma folha
     while (true) {
         binFile.seekg((predIndex - 1) * sizeof(Node), ios::beg);
         binFile.read((char*)(&predNode), sizeof(Node));
-        if (predNode.A[predNode.n] == 0) break;
+        // folha: A[0] == 0
+        if (predNode.A[0] == 0) break; 
+        // segue para o ponteiro mais à direita
         predIndex = predNode.A[predNode.n];
     }
 
-    //substitui a chave
-    node.K[i] = predNode.K[predNode.n];
-    node.B[i] = predNode.B[predNode.n];
+    //substitui a chave pelo predecessor
+    int predKey = predNode.K[predNode.n];
+    int predB = predNode.B[predNode.n];
+    
+    node.K[i] = predKey;
+    node.B[i] = predB;
 
     binFile.seekp((currentIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&node), sizeof(Node));
     binFile.flush();
 
-    //remove do predecessor
-    removeFromNode(binFile, predIndex, predNode.K[predNode.n]);
-
-    //verifica se a raíz ficou vazia
-    if (currentIndex == getRoot()) {
-        Node rootCheck(M);
-        binFile.seekg((currentIndex - 1) * sizeof(Node), ios::beg);
-        binFile.read((char*)(&rootCheck), sizeof(Node));
-        
-        //se a raiz tem 0 chaves OU chave inválida (K[1]=0) e tem filho
-        if (rootCheck.A[0] != 0 && (rootCheck.n == 0 || (rootCheck.n == 1 && rootCheck.K[1] == 0))) {
-            updateRoot(rootCheck.A[0]);
-        }
-    }
+    //remove do predecessor (folha)
+    removeFromNode(binFile, predIndex, predKey);
+    
+    // Verifica raiz após toda a operação
+    checkAndUpdateRoot(binFile);
 
     return 1;
 }
@@ -256,76 +264,91 @@ void TreeManager::removeFromNode(fstream& binFile, int nodeIndex, int key) {
     while (i <= node.n && node.K[i] != key) i++;
 
     if (i > node.n) {
-        return;
+        return; // Chave não encontrada
     }
 
-    //remove a chave
+    //remove a chave - desloca as chaves seguintes (corrige off-by-one)
     for (int j = i; j < node.n; j++) {
         node.K[j] = node.K[j + 1];
         node.B[j] = node.B[j + 1];
     }
+    
+    // Para nós internos, também ajusta os ponteiros
+    if (node.A[0] != 0) {
+        // existem node.n+1 ponteiros antes da remoção; mover A[i+1..n+1] para A[i..n]
+        for (int j = i; j <= node.n; j++) {
+            node.A[j] = node.A[j + 1];
+        }
+    }
+    
+    node.K[node.n] = 0;
+    node.B[node.n] = 0;
+    node.A[node.n + 1] = 0; // limpa possível ponteiro extra
     node.n--;
-
-    //limpa campos que sobraram
-    node.K[node.n + 1] = 0;
-    node.B[node.n + 1] = 0;
-    node.A[node.n + 1] = 0;
 
     //escreve no arquivo
     binFile.seekp((nodeIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&node), sizeof(Node));
     binFile.flush();
 
-    // adiciona verificação imediata para a raíz
-    if (nodeIndex == getRoot() && node.n == 0 && node.A[0] != 0) {
-        updateRoot(node.A[0]);
-        return; // Não precisa balancear mais
-    }
-
-    //propaga o balanceamento
-    int cur = nodeIndex;
-    while (cur > 0) {
-        balanceAfterRemove(binFile, cur);
-
-        int parent = getParentIndex(binFile, cur);
-
-        if (parent <= 0) break;
-        cur = parent;
+    // Se não é raiz, balanceia
+    if (nodeIndex != getRoot()) {
+        balanceAfterRemove(binFile, nodeIndex);
     }
 }
 
+// Verifica e atualiza a raiz se necessário
+void TreeManager::checkAndUpdateRoot(fstream& binFile) {
+    int rootIndex = getRoot();
+    Node root(M);
+    
+    binFile.seekg((rootIndex - 1) * sizeof(Node), ios::beg);
+    binFile.read((char*)(&root), sizeof(Node));
+    
+    // Se a raiz está vazia E tem filhos, promove o único filho
+    if (root.n == 0 && root.A[0] != 0) {
+        updateRoot(root.A[0]);
+    }
+}
 
 void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
+    // Relê o nó para garantir dados atualizados
     Node node(M);
     binFile.seekg((nodeIndex - 1) * sizeof(Node), ios::beg);
     binFile.read((char*)(&node), sizeof(Node));
-    binFile.flush();
 
-    int minKeys = (M / 2) - 1; // número mínimo de chaves
+    int minKeys = M / 2;
     
-    int parentIndex = getParentIndex(binFile, nodeIndex);
-
-    if (parentIndex == 0) {
-        // Re-lê para garantir dados atualizados
-        binFile.seekg((nodeIndex - 1) * sizeof(Node), ios::beg);
-        binFile.read((char*)(&node), sizeof(Node));
-        
-        if (node.n == 0 && node.A[0] != 0) {
-            updateRoot(node.A[0]);
-        }
+    // Se é raiz, não balanceia (será tratado por checkAndUpdateRoot)
+    if (nodeIndex == getRoot()) {
         return;
     }
 
-    if (node.n >= minKeys) return; // já está balanceado
+    // Se tem chaves suficientes, não precisa balancear
+    if (node.n >= minKeys) return;
+
     //lê o nó pai
+    int parentIndex = getParentIndex(binFile, nodeIndex);
+    
+    if (parentIndex == 0) {
+        return;
+    }
+
     Node parent(M);
     binFile.seekg((parentIndex - 1) * sizeof(Node), ios::beg);
     binFile.read((char*)(&parent), sizeof(Node));
 
     //descobre posição do ponteiro no pai
-    int pos = 0;
+    int pos = -1;
     for (int i = 0; i <= parent.n; i++) {
-        if (parent.A[i] == nodeIndex) { pos = i; break; }
+        if (parent.A[i] == nodeIndex) { 
+            pos = i; 
+            break; 
+        }
+    }
+
+    if (pos == -1) {
+        return;
     }
 
     //tenta redistribuir com o irmão esquerdo
@@ -336,25 +359,30 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
         binFile.read((char*)(&left), sizeof(Node));
 
         if (left.n > minKeys) {
-            //desloca chaves e ponteiros do nó atual para abrir espaço à esquerda
-            for (int j = node.n - 1; j >= 0; j--) {
+            //desloca chaves do nó atual para abrir espaço à esquerda
+            for (int j = node.n; j >= 1; j--) {
                 node.K[j + 1] = node.K[j];
                 node.B[j + 1] = node.B[j];
+            }
+            for (int j = node.n; j >= 0; j--) {
                 node.A[j + 1] = node.A[j];
             }
 
-            //move chave do pai para o nó atual
-            node.K[0] = parent.K[pos - 1];
-            node.B[0] = parent.B[pos - 1];
-            node.A[0] = left.A[left.n]; //ponteiro do irmão esquerdo
-
-            //atualiza pai
-            parent.K[pos - 1] = left.K[left.n - 1];
-            parent.B[pos - 1] = left.B[left.n - 1];
-
-            //atualiza contadores
-            left.n--;
+            // A chave K[pos] separa o irmão esquerdo do nó atual
+            node.K[1] = parent.K[pos];
+            node.B[1] = parent.B[pos];
+            node.A[0] = left.A[left.n];
             node.n++;
+
+            // A última chave do irmão esquerdo sobe para o pai
+            parent.K[pos] = left.K[left.n];
+            parent.B[pos] = left.B[left.n];
+
+            //limpa última posição do irmão esquerdo
+            left.K[left.n] = 0;
+            left.B[left.n] = 0;
+            left.A[left.n] = 0;
+            left.n--;
 
             //grava tudo de volta
             binFile.seekp((leftIndex - 1) * sizeof(Node), ios::beg);
@@ -366,6 +394,7 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
             binFile.seekp((parentIndex - 1) * sizeof(Node), ios::beg);
             binFile.write((const char*)(&parent), sizeof(Node));
 
+            binFile.flush();
             return;
         }
     }
@@ -378,23 +407,29 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
         binFile.read((char*)(&right), sizeof(Node));
 
         if (right.n > minKeys) {
-            //move chave do pai para o nó atual
-            node.K[node.n] = parent.K[pos];
-            node.B[node.n] = parent.B[pos];
+            // A chave K[pos+1] separa o nó atual do irmão direito
+            node.K[node.n + 1] = parent.K[pos + 1];
+            node.B[node.n + 1] = parent.B[pos + 1];
             node.A[node.n + 1] = right.A[0];
             node.n++;
 
-            //move primeira chave do irmão direito para o pai
-            parent.K[pos] = right.K[0];
-            parent.B[pos] = right.B[0];
+            // A primeira chave do irmão direito sobe para o pai
+            parent.K[pos + 1] = right.K[1];
+            parent.B[pos + 1] = right.B[1];
 
             //desloca chaves e ponteiros do irmão direito para a esquerda
-            for (int j = 0; j < right.n - 1; j++) {
+            for (int j = 1; j <= right.n; j++) {
                 right.K[j] = right.K[j + 1];
                 right.B[j] = right.B[j + 1];
+            }
+            for (int j = 0; j <= right.n; j++) {
                 right.A[j] = right.A[j + 1];
             }
-            right.A[right.n - 1] = right.A[right.n];// último ponteiro
+            
+            //limpa última posição
+            right.K[right.n] = 0;
+            right.B[right.n] = 0;
+            right.A[right.n] = 0;
             right.n--;
 
             // grava tudo
@@ -407,15 +442,16 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
             binFile.seekp((parentIndex - 1) * sizeof(Node), ios::beg);
             binFile.write((const char*)(&parent), sizeof(Node));
 
+            binFile.flush();
             return;
         }
     }
 
-    //caso contrário, realiza fusão
+    //Fusão: não conseguiu redistribuir
     if (pos > 0) {
-        fuseNodes(binFile, parentIndex, pos - 1, pos); //funde com o irmão esquerdo
+        fuseNodes(binFile, parentIndex, pos - 1, pos);
     } else {
-        fuseNodes(binFile, parentIndex, pos, pos + 1); //funde com o irmão direito
+        fuseNodes(binFile, parentIndex, pos, pos + 1);
     }
 }
 
@@ -433,38 +469,61 @@ void TreeManager::fuseNodes(fstream& binFile, int parentIndex, int leftPos, int 
     binFile.seekg((rightIndex - 1) * sizeof(Node), ios::beg);
     binFile.read((char*)(&right), sizeof(Node));
 
-    left.K[++left.n] = parent.K[rightPos];
-    left.B[left.n] = parent.B[rightPos];
+    // A chave separadora entre leftPos e rightPos
+    int separatorIndex = rightPos;
+    
+    //move chave separadora do pai para o nó esquerdo
+    left.n++;
+    left.K[left.n] = parent.K[separatorIndex];
+    left.B[left.n] = parent.B[separatorIndex];
     left.A[left.n] = right.A[0];
 
+    //copia todas as chaves do nó direito para o esquerdo
     for (int j = 1; j <= right.n; j++) {
-        left.K[++left.n] = right.K[j];
+        left.n++;
+        left.K[left.n] = right.K[j];
         left.B[left.n] = right.B[j];
         left.A[left.n] = right.A[j];
     }
 
-    //remove chave do pai
-    for (int j = rightPos; j < parent.n; j++) {
+    //remove chave separadora e ponteiro rightPos do pai
+    for (int j = separatorIndex; j < parent.n; j++) {
         parent.K[j] = parent.K[j + 1];
         parent.B[j] = parent.B[j + 1];
+    }
+    for (int j = rightPos; j < parent.n; j++) {
         parent.A[j] = parent.A[j + 1];
     }
+    
+    //limpa última posição do pai
+    parent.K[parent.n] = 0;
+    parent.B[parent.n] = 0;
+    parent.A[parent.n] = 0;
     parent.n--;
 
-    //grava
+    //grava os nós modificados
     binFile.seekp((leftIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&left), sizeof(Node));
+    
     binFile.seekp((parentIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&parent), sizeof(Node));
 
-    //se o pai ficou vazio e era raiz então atualiza
-    if (parentIndex == getRoot() && parent.n == 0) {
-        binFile.flush();
-        updateRoot(leftIndex);
-        return;
+    // LIMPEZA: zera o nó direito (já não é referenciado) e grava para evitar "fantasmas"
+    right.n = 0;
+    for (int j = 0; j <= M; j++) { // limpa arrays completamente
+        right.K[j] = 0;
+        right.B[j] = 0;
+        right.A[j] = 0;
     }
+    binFile.seekp((rightIndex - 1) * sizeof(Node), ios::beg);
+    binFile.write((const char*)(&right), sizeof(Node));
 
-    balanceAfterRemove(binFile, parentIndex);
+    binFile.flush();
+
+    // Se o pai não é a raiz, propaga o balanceamento
+    if (parentIndex != getRoot()) {
+        balanceAfterRemove(binFile, parentIndex);
+    }
 }
 
 int TreeManager::getParentIndex(fstream& binFile, int child){
@@ -475,18 +534,21 @@ int TreeManager::getParentIndex(fstream& binFile, int child){
 
     Node node(M);
     binFile.seekg(0, ios::beg);
+    binFile.clear();
 
     int index = 1;
     while(binFile.read((char*)&node, sizeof(Node))) {
         for(int i = 0; i <= node.n; i++) {
             if(node.A[i] == child) {
+                binFile.clear();
                 return index;
             }
         }
         index++;
     }
-
-    return 0; // Não encontrou (erro)
+    
+    binFile.clear();
+    return 0;
 }
 
 //funcao para printar o arquivo completo na tela
@@ -499,6 +561,7 @@ void TreeManager::printTree(fstream& file){
     cout << "=========================================================" << endl;
     cout << "No n, A[0], (K[1], A[1], B[1]), ... , (K[n], A[n], B[n]) \n\n";
     
+    file.clear();
     file.seekg(0, ios::beg);
     
     while(file.read((char*)(&p), sizeof(Node))){
@@ -526,6 +589,7 @@ int TreeManager::getRoot(){
 
 void TreeManager::updateRoot(int newRoot){
     fstream rootFile("treeInfo.txt", ios::out | ios::trunc);
+    rootFile.clear();
     rootFile << newRoot << " " << M;
     this->root = newRoot;
 
@@ -537,4 +601,3 @@ int TreeManager::getNextIndex(fstream& binFile) {
     long pos = binFile.tellp();
     return (int)(pos / sizeof(Node)) + 1;
 }
-

@@ -90,11 +90,31 @@ int DatabaseManager::findB(){
 
 void DatabaseManager::removeRegister(int b){
     DatabaseReg reg;
-    databaseBinary.open(databaseBinaryName, ios::in | ios::out | ios::binary);
-    databaseBinary.seekg((b-1) * sizeof(DatabaseReg), ios::beg);
-    databaseBinary.read((char *)(&reg), sizeof(DatabaseReg));
+
+    fstream file(databaseBinaryName, ios::in | ios::out | ios::binary);
+
+    if(!file){
+        cout << "Erro ao abrir o arquivo para remoção!\n";
+        return;
+    }
+
+    // posiciona e lê o registro
+    file.seekg((b - 1) * sizeof(DatabaseReg));
+    file.read(reinterpret_cast<char*>(&reg), sizeof(DatabaseReg));
+
+   /* if(!file.good()){
+        file.clear(); 
+    }*/
+
+    // marca como removido
     reg.active = false;
-    databaseBinary.seekp((b-1) * sizeof(DatabaseReg), ios::beg);
-    databaseBinary.write((const char *)(&reg), sizeof(DatabaseReg));
-    databaseBinary.close();
+
+    // regrava
+    file.seekp((b - 1) * sizeof(DatabaseReg));
+    file.write(reinterpret_cast<const char*>(&reg), sizeof(DatabaseReg));
+
+    file.flush();
+    file.close();
 }
+
+
