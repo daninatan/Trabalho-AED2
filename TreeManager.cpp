@@ -197,7 +197,6 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
 
     //chave em nó folha
     if (node.A[0] == 0) {
-        // shift left: copiar de i+1 .. n para i .. n-1 (evita ler K[n+1])
         for (int j = i; j < node.n; j++) {
             node.K[j] = node.K[j + 1];
             node.B[j] = node.B[j + 1];
@@ -221,7 +220,6 @@ int TreeManager::deleteB(fstream& binFile, int x, int &b){
         return 1;
     }
 
-    //chave em nó interno - busca predecessor (maior chave da subárvore esquerda)
     int predIndex = node.A[i - 1];
     Node predNode(M);
 
@@ -267,15 +265,12 @@ void TreeManager::removeFromNode(fstream& binFile, int nodeIndex, int key) {
         return; // Chave não encontrada
     }
 
-    //remove a chave - desloca as chaves seguintes (corrige off-by-one)
     for (int j = i; j < node.n; j++) {
         node.K[j] = node.K[j + 1];
         node.B[j] = node.B[j + 1];
     }
     
-    // Para nós internos, também ajusta os ponteiros
     if (node.A[0] != 0) {
-        // existem node.n+1 ponteiros antes da remoção; mover A[i+1..n+1] para A[i..n]
         for (int j = i; j <= node.n; j++) {
             node.A[j] = node.A[j + 1];
         }
@@ -283,7 +278,7 @@ void TreeManager::removeFromNode(fstream& binFile, int nodeIndex, int key) {
     
     node.K[node.n] = 0;
     node.B[node.n] = 0;
-    node.A[node.n + 1] = 0; // limpa possível ponteiro extra
+    node.A[node.n + 1] = 0; 
     node.n--;
 
     //escreve no arquivo
@@ -319,7 +314,6 @@ void TreeManager::balanceAfterRemove(fstream& binFile, int nodeIndex) {
 
     int minKeys = M / 2;
     
-    // Se é raiz, não balanceia (será tratado por checkAndUpdateRoot)
     if (nodeIndex == getRoot()) {
         return;
     }
@@ -508,7 +502,6 @@ void TreeManager::fuseNodes(fstream& binFile, int parentIndex, int leftPos, int 
     binFile.seekp((parentIndex - 1) * sizeof(Node), ios::beg);
     binFile.write((const char*)(&parent), sizeof(Node));
 
-    // LIMPEZA: zera o nó direito (já não é referenciado) e grava para evitar "fantasmas"
     right.n = 0;
     for (int j = 0; j <= M; j++) { // limpa arrays completamente
         right.K[j] = 0;
